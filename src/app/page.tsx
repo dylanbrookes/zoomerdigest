@@ -514,51 +514,61 @@ At night, Teddy curled up, heart pounding fast like all chihuahuas' hearts do, d
               setIsPlaying(true);
             }}
           >
-            <div className="flex flex-col items-center justify-center">
-              <div className="text-9xl font-bold text-white animate-pulse">
+            <div className="flex flex-col items-center justify-center px-4">
+              <div className="text-6xl sm:text-8xl md:text-9xl font-bold text-white animate-pulse">
                 {countdown}
               </div>
-              <p className="text-xl text-white/80 mt-4">Get ready...</p>
-              <p className="text-sm text-white/60 mt-2">Tap or click to start now</p>
+              <p className="text-lg sm:text-xl text-white/80 mt-3 sm:mt-4">Get ready...</p>
+              <p className="text-xs sm:text-sm text-white/60 mt-2">Tap or click to start now</p>
             </div>
           </div>
         )}
 
         {/* Reading Display - Shows when reading or paused */}
         {hasStartedReading && (
-          <div className={`transition-all duration-500 fixed inset-0 flex items-center justify-center ${isReadingMode ? 'opacity-100' : 'opacity-100'}`}>
+          <div 
+            className={`transition-all duration-500 fixed inset-0 flex items-center justify-center ${isReadingMode ? 'opacity-100' : 'opacity-100'} cursor-pointer`}
+            onClick={(e) => {
+              // Don't toggle if clicking on buttons or interactive elements
+              const target = e.target as HTMLElement;
+              if (target.tagName === 'BUTTON' || target.closest('button') || target.tagName === 'INPUT' || target.closest('input') || target.closest('label')) {
+                return;
+              }
+              togglePlay();
+            }}
+          >
             <div className="flex flex-col items-center justify-center w-full h-full relative">
               {/* Controls when reading or paused */}
-              <div className="absolute top-6 left-0 right-0 flex flex-col items-center gap-4 z-10">
-                <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-black/10 dark:bg-white/10 backdrop-blur-sm">
+              <div className="absolute top-3 sm:top-6 left-0 right-0 flex flex-col items-center gap-3 sm:gap-4 z-10 px-2">
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 rounded-lg bg-black/10 dark:bg-white/10 backdrop-blur-sm max-w-full">
                   {!isPlaying && (
                     <span className="text-xs px-2 py-1 rounded bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 font-medium">
                       Paused
                     </span>
                   )}
-                  <span className="text-sm text-zinc-700 dark:text-zinc-300 font-medium font-mono">
+                  <span className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 font-medium font-mono">
                     {speed} WPM
                   </span>
-                  <span className="text-zinc-400 dark:text-zinc-500">•</span>
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400 font-mono">
-                    Word {currentIndex + 1} of {words.length}
+                  <span className="hidden sm:inline text-zinc-400 dark:text-zinc-500">•</span>
+                  <span className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 font-mono">
+                    <span className="hidden sm:inline">Word </span>{currentIndex + 1}<span className="hidden sm:inline"> of {words.length}</span>
                   </span>
-                  <span className="text-zinc-400 dark:text-zinc-500">•</span>
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400 font-mono">
+                  <span className="hidden sm:inline text-zinc-400 dark:text-zinc-500">•</span>
+                  <span className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 font-mono">
                     {Math.round(((currentIndex + 1) / words.length) * 100)}%
                   </span>
                   {remainingSeconds > 0 && (
                     <>
-                      <span className="text-zinc-400 dark:text-zinc-500">•</span>
-                      <span className="text-sm text-zinc-600 dark:text-zinc-400 font-mono">
-                        {remainingMinutes > 0 ? `${remainingMinutes}m ` : ''}{remainingSecs}s left
+                      <span className="hidden sm:inline text-zinc-400 dark:text-zinc-500">•</span>
+                      <span className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 font-mono">
+                        {remainingMinutes > 0 ? `${remainingMinutes}m ` : ''}{remainingSecs}s<span className="hidden sm:inline"> left</span>
                       </span>
                     </>
                   )}
                   {isPlaying && (
                     <button
                       onClick={handleStop}
-                      className="ml-2 px-3 py-1 text-xs rounded bg-red-600 text-white font-medium hover:bg-red-700 transition-colors cursor-pointer"
+                      className="ml-1 sm:ml-2 px-2 sm:px-3 py-1 text-xs rounded bg-red-600 text-white font-medium hover:bg-red-700 transition-colors cursor-pointer"
                     >
                       Stop
                     </button>
@@ -569,24 +579,25 @@ At night, Teddy curled up, heart pounding fast like all chihuahuas' hearts do, d
                         setWords([]);
                         setCurrentIndex(0);
                       }}
-                      className="ml-2 px-3 py-1 text-xs rounded bg-zinc-600 text-white font-medium hover:bg-zinc-700 transition-colors cursor-pointer"
+                      className="ml-1 sm:ml-2 px-2 sm:px-3 py-1 text-xs rounded bg-zinc-600 text-white font-medium hover:bg-zinc-700 transition-colors cursor-pointer"
                     >
-                      Back to Input
+                      <span className="hidden sm:inline">Back to Input</span>
+                      <span className="sm:hidden">Back</span>
                     </button>
                   )}
                 </div>
                 
                 {/* Speed Control - Show when paused */}
                 {!isPlaying && (
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full px-2">
                     <button
                       onClick={handleStart}
-                      className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
+                      className="px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer w-full sm:w-auto whitespace-nowrap"
                     >
                       ▶ Play
                     </button>
-                    <div className="flex items-center gap-4 px-5 py-3 rounded-xl bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm shadow-lg border border-zinc-200 dark:border-zinc-700">
-                      <label htmlFor="speed-paused" className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 whitespace-nowrap">
+                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 px-4 sm:px-5 py-3 rounded-xl bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm shadow-lg border border-zinc-200 dark:border-zinc-700 w-full sm:w-auto">
+                      <label htmlFor="speed-paused" className="text-xs sm:text-sm font-semibold text-zinc-700 dark:text-zinc-300 whitespace-nowrap">
                         Speed: <span className="text-blue-600 dark:text-blue-400">{speed} WPM</span>
                       </label>
                       <input
@@ -597,7 +608,7 @@ At night, Teddy curled up, heart pounding fast like all chihuahuas' hearts do, d
                         step="50"
                         value={speed}
                         onChange={(e) => setSpeed(Number(e.target.value))}
-                        className="w-64 h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-600 hover:accent-blue-700 transition-colors"
+                        className="w-full sm:w-64 h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-600 hover:accent-blue-700 transition-colors"
                       />
                     </div>
                   </div>
@@ -605,20 +616,29 @@ At night, Teddy curled up, heart pounding fast like all chihuahuas' hearts do, d
               </div>
 
               {/* Word Display - Anchored focal letter at exact center */}
-              <div className="relative w-full flex items-center justify-center flex-1 px-4">
-                <div className="relative w-full max-w-4xl h-32 flex items-center justify-center">
+              <div className="relative w-full flex items-center justify-center flex-1 px-2 sm:px-4">
+                <div className="relative w-full max-w-4xl h-24 sm:h-32 flex items-center justify-center">
                   {/* Vertical guide line */}
                   <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-red-500/20 dark:bg-red-400/20 pointer-events-none" />
                   
                   {/* Top horizontal line */}
-                  <div className="absolute left-0 right-0 top-1/2 -translate-y-[calc(50%+7rem)] h-px bg-zinc-300/30 dark:bg-zinc-600/30 pointer-events-none" />
+                  <div className="absolute left-0 right-0 top-1/2 -translate-y-[calc(50%+5rem)] sm:-translate-y-[calc(50%+7rem)] h-px bg-zinc-300/30 dark:bg-zinc-600/30 pointer-events-none" />
                   
                   {/* Bottom horizontal line */}
-                  <div className="absolute left-0 right-0 top-1/2 -translate-y-[calc(-50%-7rem)] h-px bg-zinc-300/30 dark:bg-zinc-600/30 pointer-events-none" />
+                  <div className="absolute left-0 right-0 top-1/2 -translate-y-[calc(-50%-5rem)] sm:-translate-y-[calc(-50%-7rem)] h-px bg-zinc-300/30 dark:bg-zinc-600/30 pointer-events-none" />
                   
-                  {/* Vertical line from top horizontal line down toward focal point */}
+                  {/* Vertical line from top horizontal line down toward focal point - mobile */}
                   <div 
-                    className="absolute left-1/2 w-px bg-zinc-300/30 dark:bg-zinc-600/30 pointer-events-none"
+                    className="absolute left-1/2 w-px bg-zinc-300/30 dark:bg-zinc-600/30 pointer-events-none sm:hidden"
+                    style={{ 
+                      top: 'calc(50% - 5rem)',
+                      height: '1rem',
+                      transform: 'translateX(-50%)'
+                    }}
+                  />
+                  {/* Vertical line from top horizontal line down toward focal point - desktop */}
+                  <div 
+                    className="absolute left-1/2 w-px bg-zinc-300/30 dark:bg-zinc-600/30 pointer-events-none hidden sm:block"
                     style={{ 
                       top: 'calc(50% - 7rem)', 
                       height: '1.5rem',
@@ -626,9 +646,18 @@ At night, Teddy curled up, heart pounding fast like all chihuahuas' hearts do, d
                     }}
                   />
                   
-                  {/* Vertical line from bottom horizontal line up toward focal point */}
+                  {/* Vertical line from bottom horizontal line up toward focal point - mobile */}
                   <div 
-                    className="absolute left-1/2 w-px bg-zinc-300/30 dark:bg-zinc-600/30 pointer-events-none"
+                    className="absolute left-1/2 w-px bg-zinc-300/30 dark:bg-zinc-600/30 pointer-events-none sm:hidden"
+                    style={{ 
+                      bottom: 'calc(50% - 5rem)', 
+                      height: '1rem',
+                      transform: 'translateX(-50%)'
+                    }}
+                  />
+                  {/* Vertical line from bottom horizontal line up toward focal point - desktop */}
+                  <div 
+                    className="absolute left-1/2 w-px bg-zinc-300/30 dark:bg-zinc-600/30 pointer-events-none hidden sm:block"
                     style={{ 
                       bottom: 'calc(50% - 7rem)', 
                       height: '1.5rem',
@@ -640,18 +669,18 @@ At night, Teddy curled up, heart pounding fast like all chihuahuas' hearts do, d
                   <div className="absolute left-1/2 top-1/2 -translate-y-1/2 flex items-center">
                     {/* Focal letter container - centers the letter on the anchor point */}
                     <div className="relative -translate-x-1/2 transition-opacity duration-150">
-                      <span className="text-6xl sm:text-7xl md:text-8xl font-bold text-red-600 dark:text-red-500 leading-none font-mono inline-block drop-shadow-sm">
+                      <span className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-red-600 dark:text-red-500 leading-none font-mono inline-block drop-shadow-sm">
                         {wordParts.focal}
                       </span>
                       {/* Before text - ends right before focal letter (dimmed) */}
                       <span 
-                        className="absolute right-full text-6xl sm:text-7xl md:text-8xl font-bold text-zinc-900 dark:text-zinc-50 leading-none font-mono whitespace-nowrap pr-1 opacity-70 transition-opacity duration-150"
+                        className="absolute right-full text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-zinc-900 dark:text-zinc-50 leading-none font-mono whitespace-nowrap pr-0.5 sm:pr-1 opacity-70 transition-opacity duration-150"
                       >
                         {wordParts.before}
                       </span>
                       {/* After text - starts right after focal letter (dimmed) */}
                       <span 
-                        className="absolute left-full text-6xl sm:text-7xl md:text-8xl font-bold text-zinc-900 dark:text-zinc-50 leading-none font-mono whitespace-nowrap pl-1 opacity-70 transition-opacity duration-150"
+                        className="absolute left-full text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-zinc-900 dark:text-zinc-50 leading-none font-mono whitespace-nowrap pl-0.5 sm:pl-1 opacity-70 transition-opacity duration-150"
                       >
                         {wordParts.after}
                       </span>
@@ -661,13 +690,13 @@ At night, Teddy curled up, heart pounding fast like all chihuahuas' hearts do, d
               </div>
 
               {/* Progress Indicator - Always visible when reading or paused */}
-              <div className="absolute bottom-8 left-0 right-0 flex justify-center">
-                <div className="w-full max-w-md px-4">
-                  <div className="mb-2 flex justify-between text-xs text-zinc-500 dark:text-zinc-400">
+              <div className="absolute bottom-4 sm:bottom-8 left-0 right-0 flex justify-center px-2">
+                <div className="w-full max-w-md">
+                  <div className="mb-1 sm:mb-2 flex justify-between text-xs text-zinc-500 dark:text-zinc-400">
                     <span>Progress</span>
                     <span>{Math.round(((currentIndex + 1) / words.length) * 100)}%</span>
                   </div>
-                  <div className="w-full h-2 bg-zinc-200/70 dark:bg-zinc-700/70 rounded-full overflow-hidden shadow-inner">
+                  <div className="w-full h-1.5 sm:h-2 bg-zinc-200/70 dark:bg-zinc-700/70 rounded-full overflow-hidden shadow-inner">
                     <div
                       className="h-full bg-gradient-to-r from-blue-600 to-blue-500 transition-all duration-300 ease-out"
                       style={{ width: `${((currentIndex + 1) / words.length) * 100}%` }}
