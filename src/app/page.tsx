@@ -84,6 +84,7 @@ export default function Home() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownStateRef = useRef<number | null>(null);
 
   // Parse text into words
   const parseText = (text: string): string[] => {
@@ -128,7 +129,13 @@ export default function Home() {
       switch (e.key) {
         case ' ':
           e.preventDefault();
-          togglePlay();
+          // If countdown is active, skip it and start reading
+          if (countdownStateRef.current !== null) {
+            setCountdown(null);
+            setIsPlaying(true);
+          } else {
+            togglePlay();
+          }
           break;
         case 'ArrowLeft':
           e.preventDefault();
@@ -196,6 +203,11 @@ export default function Home() {
       setCountdown(3);
     }
   };
+
+  // Sync countdown state to ref
+  useEffect(() => {
+    countdownStateRef.current = countdown;
+  }, [countdown]);
 
   // Handle countdown
   useEffect(() => {
@@ -280,6 +292,29 @@ export default function Home() {
               <div className="absolute bottom-3 right-3 text-xs text-zinc-400 dark:text-zinc-500">
                 {inputText.length > 0 && `${inputText.split(/\s+/).filter(w => w.length > 0).length} words`}
               </div>
+              {!inputText.trim() && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <button
+                    onClick={() => {
+                      const sampleText = `Teddy the chihuahua was small enough to fit inside a hoodie pocket, but he carried himself like a dog ten times his size. His ears stood straight up, radar dishes tuned to danger, snacks, and the sound of the fridge opening. He ruled the apartment from the couch armrest, watching the world with the stern confidence of someone who believed everything existed for his approval.
+
+Every morning, Teddy marched on his tiny paws to inspect his domain. The mailman was his sworn enemy. The vacuum was a demon. Sunbeams on the floor were sacred resting grounds. Despite his tough exterior, he had one weakness: blankets. The moment a blanket appeared, Teddy transformed from fearless guardian into a shivering burrito who demanded warmth and silence.
+
+At night, Teddy curled up, heart pounding fast like all chihuahuas' hearts do, dreaming of heroic battles he definitely would have won. In his sleep, his legs twitched as if he were chasing something enormous and terrifying—probably a squirrel. And though the world saw a tiny dog, Teddy knew the truth: bravery isn't about size, it's about attitude, and he had plenty of that.`;
+                      setInputText(sampleText);
+                      // Start reading with the sample text
+                      const parsedWords = parseText(sampleText);
+                      setWords(parsedWords);
+                      setCurrentIndex(0);
+                      setIsPlaying(false);
+                      setCountdown(3);
+                    }}
+                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer pointer-events-auto"
+                  >
+                    Try Sample Text
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -472,12 +507,19 @@ export default function Home() {
 
         {/* Countdown Overlay */}
         {countdown !== null && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 dark:bg-black/70 backdrop-blur-sm">
+          <div 
+            className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 dark:bg-black/70 backdrop-blur-sm cursor-pointer"
+            onClick={() => {
+              setCountdown(null);
+              setIsPlaying(true);
+            }}
+          >
             <div className="flex flex-col items-center justify-center">
               <div className="text-9xl font-bold text-white animate-pulse">
                 {countdown}
               </div>
               <p className="text-xl text-white/80 mt-4">Get ready...</p>
+              <p className="text-sm text-white/60 mt-2">Tap or click to start now</p>
             </div>
           </div>
         )}
@@ -536,20 +578,28 @@ export default function Home() {
                 
                 {/* Speed Control - Show when paused */}
                 {!isPlaying && (
-                  <div className="flex items-center gap-4 px-5 py-3 rounded-xl bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm shadow-lg border border-zinc-200 dark:border-zinc-700">
-                    <label htmlFor="speed-paused" className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 whitespace-nowrap">
-                      Speed: <span className="text-blue-600 dark:text-blue-400">{speed} WPM</span>
-                    </label>
-                    <input
-                      id="speed-paused"
-                      type="range"
-                      min="100"
-                      max="1000"
-                      step="50"
-                      value={speed}
-                      onChange={(e) => setSpeed(Number(e.target.value))}
-                      className="w-64 h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-600 hover:accent-blue-700 transition-colors"
-                    />
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={handleStart}
+                      className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
+                    >
+                      ▶ Play
+                    </button>
+                    <div className="flex items-center gap-4 px-5 py-3 rounded-xl bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm shadow-lg border border-zinc-200 dark:border-zinc-700">
+                      <label htmlFor="speed-paused" className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 whitespace-nowrap">
+                        Speed: <span className="text-blue-600 dark:text-blue-400">{speed} WPM</span>
+                      </label>
+                      <input
+                        id="speed-paused"
+                        type="range"
+                        min="100"
+                        max="1000"
+                        step="50"
+                        value={speed}
+                        onChange={(e) => setSpeed(Number(e.target.value))}
+                        className="w-64 h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-600 hover:accent-blue-700 transition-colors"
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -595,13 +645,13 @@ export default function Home() {
                       </span>
                       {/* Before text - ends right before focal letter (dimmed) */}
                       <span 
-                        className="absolute right-full text-6xl sm:text-7xl md:text-8xl font-bold text-zinc-900 dark:text-zinc-50 leading-none font-mono whitespace-nowrap pr-1 opacity-40 transition-opacity duration-150"
+                        className="absolute right-full text-6xl sm:text-7xl md:text-8xl font-bold text-zinc-900 dark:text-zinc-50 leading-none font-mono whitespace-nowrap pr-1 opacity-70 transition-opacity duration-150"
                       >
                         {wordParts.before}
                       </span>
                       {/* After text - starts right after focal letter (dimmed) */}
                       <span 
-                        className="absolute left-full text-6xl sm:text-7xl md:text-8xl font-bold text-zinc-900 dark:text-zinc-50 leading-none font-mono whitespace-nowrap pl-1 opacity-40 transition-opacity duration-150"
+                        className="absolute left-full text-6xl sm:text-7xl md:text-8xl font-bold text-zinc-900 dark:text-zinc-50 leading-none font-mono whitespace-nowrap pl-1 opacity-70 transition-opacity duration-150"
                       >
                         {wordParts.after}
                       </span>
